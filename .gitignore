@@ -8,6 +8,7 @@ __pycache__/
 .env
 .venv/
 venv/
+*.db
 
 # OS files
 .DS_Store
