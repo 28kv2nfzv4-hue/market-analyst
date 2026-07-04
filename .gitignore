@@ -1,0 +1,13 @@
+# Claude / OpenClaw local files
+.claude-flow/
+.claude/
+
+# Python
+__pycache__/
+*.pyc
+.env
+.venv/
+venv/
+
+# OS files
+.DS_Store
