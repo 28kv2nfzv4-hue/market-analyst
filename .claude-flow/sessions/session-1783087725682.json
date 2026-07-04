@@ -1,0 +1,14 @@
+{
+  "id": "session-1783087725682",
+  "startedAt": "2026-07-03T14:08:45.682Z",
+  "cwd": "/Users/delanomurray/market-analyst",
+  "context": {},
+  "metrics": {
+    "edits": 0,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "endedAt": "2026-07-03T14:15:00.098Z",
+  "duration": 374417
+}
