@@ -2,7 +2,7 @@ name: Daily Market Digest
 
 on:
   schedule:
-    - cron: '0 12 * * 1-5' # 12:00 UTC, Mon-Fri
+    - cron: '0 13 * * 1-5' # 13:00 UTC = 8:00am CDT (UTC-5), Mon-Fri
   workflow_dispatch:
 
 jobs:
