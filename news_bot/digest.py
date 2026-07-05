@@ -92,12 +92,19 @@ def summarize_with_claude(prompt):
     return response.json()["content"][0]["text"]
 
 
+TELEGRAM_MAX_MESSAGE_LENGTH = 4096
+
+
 def send_telegram_message(text):
+    text = text[: TELEGRAM_MAX_MESSAGE_LENGTH - 3] + "..." if len(text) > TELEGRAM_MAX_MESSAGE_LENGTH else text
+
     response = requests.post(
         f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
         json={"chat_id": TELEGRAM_CHAT_ID, "text": text},
         timeout=15,
     )
+    if not response.ok:
+        print(f"Telegram API error {response.status_code}: {response.text}")
     response.raise_for_status()
 
 
