@@ -89,7 +89,11 @@ def summarize_with_claude(prompt):
         timeout=60,
     )
     response.raise_for_status()
-    return response.json()["content"][0]["text"]
+    content_blocks = response.json()["content"]
+    for block in content_blocks:
+        if block.get("type") == "text":
+            return block["text"]
+    raise RuntimeError(f"No text block in Claude response: {content_blocks}")
 
 
 TELEGRAM_MAX_MESSAGE_LENGTH = 4096
