@@ -8,10 +8,12 @@ from sqlalchemy.orm import Session
 from database.database import Base, engine, get_db
 from database.models import TradeORM
 from models.trade import Trade, TradeOut
+from telegram_bot import router as telegram_router
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Project Atlas API", version="0.1.0")
+app.include_router(telegram_router)
 
 allow_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
 allow_origins += [
