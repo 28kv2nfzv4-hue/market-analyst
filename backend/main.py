@@ -70,6 +70,16 @@ def list_trades(db: Session = Depends(get_db)):
     return db.query(TradeORM).all()
 
 
+@app.delete("/trades/{trade_id}")
+def delete_trade(trade_id: int, db: Session = Depends(get_db)):
+    db_trade = db.query(TradeORM).filter(TradeORM.id == trade_id).first()
+    if not db_trade:
+        raise HTTPException(status_code=404, detail="Trade not found")
+    db.delete(db_trade)
+    db.commit()
+    return {"deleted": trade_id}
+
+
 @app.post("/digests", dependencies=[Depends(verify_digest_secret)])
 def create_digest(digest: DigestIn, db: Session = Depends(get_db)):
     db_digest = DigestORM(content=digest.content)
