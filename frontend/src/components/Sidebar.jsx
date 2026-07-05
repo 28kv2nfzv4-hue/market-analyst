@@ -1,11 +1,14 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, LineChart, Settings, TrendingUp } from 'lucide-react'
+import { LayoutDashboard, LineChart, MessageCircle, Newspaper, Settings, TrendingUp } from 'lucide-react'
 
 const NAV_ITEMS = [
   { label: 'Dashboard', icon: LayoutDashboard, to: '/', end: true },
   { label: 'Trades', icon: LineChart, to: '/trades' },
+  { label: 'Digests', icon: Newspaper, to: '/digests' },
   { label: 'Settings', icon: Settings, to: '/settings' },
 ]
+
+const TELEGRAM_BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME
 
 export default function Sidebar() {
   return (
@@ -34,6 +37,18 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      {TELEGRAM_BOT_USERNAME && (
+        <a
+          href={`https://t.me/${TELEGRAM_BOT_USERNAME}`}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-auto flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
+        >
+          <MessageCircle className="h-4 w-4" />
+          Chat on Telegram
+        </a>
+      )}
     </aside>
   )
 }

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from database.database import Base, engine, get_db
 from database.models import DigestORM, TradeORM
-from models.digest import DigestIn
+from models.digest import DigestIn, DigestOut
 from models.trade import Trade, TradeOut
 from telegram_bot import router as telegram_router
 
@@ -77,3 +77,8 @@ def create_digest(digest: DigestIn, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_digest)
     return {"id": db_digest.id}
+
+
+@app.get("/digests", response_model=List[DigestOut])
+def list_digests(db: Session = Depends(get_db)):
+    return db.query(DigestORM).order_by(DigestORM.id.desc()).limit(30).all()
