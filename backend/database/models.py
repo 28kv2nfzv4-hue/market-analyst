@@ -19,6 +19,17 @@ class TradeORM(Base):
     result = Column(SAEnum(TradeResult), nullable=False, default=TradeResult.PENDING)
     notes = Column(String, nullable=True)
 
+    # Broker-sync fields (nullable — manual trades never set these).
+    # NOTE: these columns must be added to any already-deployed database by hand
+    # (`ALTER TABLE trades ADD COLUMN ...`) since Base.metadata.create_all only
+    # creates missing tables, it never alters an existing one (no Alembic here).
+    source = Column(String, nullable=True)  # e.g. "deriv"; null/absent means manual entry
+    external_id = Column(String, nullable=True, unique=True)  # dedup key, e.g. deriv contract_id
+    exit_price = Column(Float, nullable=True)
+    profit_loss = Column(Float, nullable=True)
+    opened_at = Column(DateTime, nullable=True)
+    closed_at = Column(DateTime, nullable=True)
+
 
 class ChatMessageORM(Base):
     __tablename__ = "chat_messages"

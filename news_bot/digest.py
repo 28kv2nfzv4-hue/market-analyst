@@ -1,4 +1,5 @@
 import os
+import time
 from datetime import datetime, timezone
 
 import requests
@@ -10,8 +11,20 @@ TELEGRAM_BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
 BACKEND_API_URL = os.environ.get("BACKEND_API_URL", "")
 DIGEST_API_SECRET = os.environ.get("DIGEST_API_SECRET", "")
+FINNHUB_LIMIT = int(os.environ.get("FINNHUB_LIMIT", "10"))
+NEWSAPI_LIMIT = int(os.environ.get("NEWSAPI_LIMIT", "10"))
 
 CLAUDE_MODEL = "claude-sonnet-5"
+
+
+def with_retry(fn, *args, retries=3, backoff=2, **kwargs):
+    for attempt in range(1, retries + 1):
+        try:
+            return fn(*args, **kwargs)
+        except requests.RequestException:
+            if attempt == retries:
+                raise
+            time.sleep(backoff * attempt)
 
 
 def fetch_finnhub_news(limit=10):
@@ -118,7 +131,8 @@ def store_digest(content):
     if not BACKEND_API_URL:
         return
     try:
-        response = requests.post(
+        response = with_retry(
+            requests.post,
             f"{BACKEND_API_URL}/digests",
             json={"content": content},
             headers={"X-Digest-Secret": DIGEST_API_SECRET},
@@ -130,17 +144,20 @@ def store_digest(content):
 
 
 def main():
-    articles = fetch_finnhub_news() + fetch_newsapi_news()
+    articles = with_retry(fetch_finnhub_news, limit=FINNHUB_LIMIT) + with_retry(
+        fetch_newsapi_news, limit=NEWSAPI_LIMIT
+    )
     if not articles:
         print("No articles fetched; skipping digest.")
         return
 
-    summary = summarize_with_claude(build_prompt(articles))
+    summary = with_retry(summarize_with_claude, build_prompt(articles))
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    send_telegram_message(f"Market Briefing — {date_str}\n\n{summary}")
+    briefing = f"Market Briefing — {date_str}\n\n{summary}"
+    with_retry(send_telegram_message, briefing)
     print("Daily digest sent.")
 
-    store_digest(summary)
+    store_digest(briefing)
 
 
 if __name__ == "__main__":

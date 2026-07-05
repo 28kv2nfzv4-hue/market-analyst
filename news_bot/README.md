@@ -12,6 +12,15 @@ Fetches financial market news (Finnhub) and geopolitical/economic news (NewsAPI)
 | `TELEGRAM_BOT_TOKEN` | Message [@BotFather](https://t.me/BotFather) on Telegram, `/newbot`, follow prompts |
 | `TELEGRAM_CHAT_ID` | Message your new bot once, then visit `https://api.telegram.org/bot<TOKEN>/getUpdates` and read `message.chat.id` from the response |
 
+## Optional configuration
+
+| Variable | Purpose |
+|---|---|
+| `BACKEND_API_URL` | Base URL of the backend API; if set, the digest is also stored via `POST /digests` so it shows up on the dashboard's digest history page |
+| `DIGEST_API_SECRET` | Must match the backend's `DIGEST_API_SECRET` env var; leave unset if the backend has none configured |
+| `FINNHUB_LIMIT` | Number of Finnhub articles to fetch (default `10`) |
+| `NEWSAPI_LIMIT` | Number of NewsAPI articles to fetch (default `10`) |
+
 ## Set as GitHub Actions secrets
 
 Run these yourself (so the values never pass through any AI session):

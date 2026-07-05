@@ -25,3 +25,17 @@ export function ResultBadge({ result }) {
     </span>
   )
 }
+
+const SOURCE_STYLES = {
+  deriv: 'bg-violet-500/10 text-violet-400',
+  manual: 'bg-slate-700 text-slate-300',
+}
+
+export function SourceBadge({ source }) {
+  const label = source || 'manual'
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${SOURCE_STYLES[label] ?? 'bg-slate-700 text-slate-300'}`}>
+      {label}
+    </span>
+  )
+}

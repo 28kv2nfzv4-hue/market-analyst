@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 import requests
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
@@ -15,6 +16,12 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 CLAUDE_MODEL = "claude-sonnet-5"
 
 HISTORY_LIMIT = 10  # messages kept per chat for conversation context
+TELEGRAM_MAX_LEN = 4096
+
+WELCOME_MESSAGE = (
+    "Welcome! I'm your trading dashboard assistant. Ask me about your trades, "
+    "the latest market digest, or anything markets-related."
+)
 
 SYSTEM_PROMPT_TEMPLATE = (
     "You are a financial markets assistant for a personal trading dashboard. "
@@ -91,12 +98,22 @@ def ask_claude(db: Session, chat_id: str, message: str) -> str:
 
 
 def send_telegram_message(chat_id: int, text: str) -> None:
+    if len(text) > TELEGRAM_MAX_LEN:
+        text = text[: TELEGRAM_MAX_LEN - 3] + "..."
+
     response = requests.post(
         f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
         json={"chat_id": chat_id, "text": text},
         timeout=15,
     )
     response.raise_for_status()
+
+
+def parse_start_command(text: str) -> Optional[str]:
+    parts = text.strip().split(maxsplit=1)
+    if parts and parts[0] == "/start":
+        return parts[1] if len(parts) > 1 else ""
+    return None
 
 
 @router.post("/telegram/webhook")
@@ -115,6 +132,12 @@ async def telegram_webhook(
 
     if chat_id and text:
         chat_id_str = str(chat_id)
+
+        start_payload = parse_start_command(text)
+        if start_payload is not None:
+            send_telegram_message(chat_id, WELCOME_MESSAGE)
+            return {"ok": True}
+
         db.add(ChatMessageORM(chat_id=chat_id_str, role="user", content=text))
         db.commit()
 

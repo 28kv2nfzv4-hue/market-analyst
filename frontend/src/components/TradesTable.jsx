@@ -1,8 +1,8 @@
-import { DirectionBadge, ResultBadge } from './StatusBadge'
+import { DirectionBadge, ResultBadge, SourceBadge } from './StatusBadge'
 
-const COLUMNS = ['Pair', 'Direction', 'Entry', 'Stop Loss', 'Take Profit', 'Risk %', 'Result', 'Notes']
+const COLUMNS = ['Pair', 'Direction', 'Entry', 'Stop Loss', 'Take Profit', 'Risk %', 'Result', 'Source', 'Notes', '']
 
-export default function TradesTable({ trades }) {
+export default function TradesTable({ trades, onEdit, onDelete }) {
   if (trades.length === 0) {
     return (
       <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-8 text-center text-sm text-slate-400">
@@ -37,7 +37,28 @@ export default function TradesTable({ trades }) {
               <td className="px-4 py-3">
                 <ResultBadge result={trade.result} />
               </td>
+              <td className="px-4 py-3">
+                <SourceBadge source={trade.source} />
+              </td>
               <td className="max-w-xs truncate px-4 py-3 text-slate-400">{trade.notes || '—'}</td>
+              <td className="px-4 py-3 text-right">
+                <div className="flex justify-end gap-3 text-xs font-medium">
+                  <button
+                    type="button"
+                    onClick={() => onEdit?.(trade)}
+                    className="text-sky-400 hover:text-sky-300"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onDelete?.(trade)}
+                    className="text-rose-400 hover:text-rose-300"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>

@@ -19,6 +19,8 @@ services:
         sync: false
       - key: DIGEST_API_SECRET
         sync: false
+      - key: BROKER_SYNC_SECRET
+        sync: false
       - key: DATABASE_URL
         sync: false
     # DATABASE_URL should point at an external Postgres database (e.g. a
