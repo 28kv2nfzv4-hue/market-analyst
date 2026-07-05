@@ -8,6 +8,8 @@ NEWSAPI_API_KEY = os.environ["NEWSAPI_API_KEY"]
 ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
 TELEGRAM_BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
+BACKEND_API_URL = os.environ.get("BACKEND_API_URL", "")
+DIGEST_API_SECRET = os.environ.get("DIGEST_API_SECRET", "")
 
 CLAUDE_MODEL = "claude-sonnet-5"
 
@@ -112,6 +114,21 @@ def send_telegram_message(text):
     response.raise_for_status()
 
 
+def store_digest(content):
+    if not BACKEND_API_URL:
+        return
+    try:
+        response = requests.post(
+            f"{BACKEND_API_URL}/digests",
+            json={"content": content},
+            headers={"X-Digest-Secret": DIGEST_API_SECRET},
+            timeout=60,  # Render free tier can take ~30-50s to wake from idle
+        )
+        response.raise_for_status()
+    except requests.RequestException as error:
+        print(f"Failed to store digest on backend (non-fatal): {error}")
+
+
 def main():
     articles = fetch_finnhub_news() + fetch_newsapi_news()
     if not articles:
@@ -122,6 +139,8 @@ def main():
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     send_telegram_message(f"Market Briefing — {date_str}\n\n{summary}")
     print("Daily digest sent.")
+
+    store_digest(summary)
 
 
 if __name__ == "__main__":

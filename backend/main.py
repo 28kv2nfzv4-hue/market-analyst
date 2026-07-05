@@ -1,14 +1,22 @@
 import os
 from typing import List
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from database.database import Base, engine, get_db
-from database.models import TradeORM
+from database.models import DigestORM, TradeORM
+from models.digest import DigestIn
 from models.trade import Trade, TradeOut
 from telegram_bot import router as telegram_router
+
+DIGEST_API_SECRET = os.getenv("DIGEST_API_SECRET", "")
+
+
+def verify_digest_secret(x_digest_secret: str = Header(default="")):
+    if DIGEST_API_SECRET and x_digest_secret != DIGEST_API_SECRET:
+        raise HTTPException(status_code=403, detail="Invalid secret")
 
 Base.metadata.create_all(bind=engine)
 
@@ -60,3 +68,12 @@ def create_trade(trade: Trade, db: Session = Depends(get_db)):
 @app.get("/trades", response_model=List[TradeOut])
 def list_trades(db: Session = Depends(get_db)):
     return db.query(TradeORM).all()
+
+
+@app.post("/digests", dependencies=[Depends(verify_digest_secret)])
+def create_digest(digest: DigestIn, db: Session = Depends(get_db)):
+    db_digest = DigestORM(content=digest.content)
+    db.add(db_digest)
+    db.commit()
+    db.refresh(db_digest)
+    return {"id": db_digest.id}

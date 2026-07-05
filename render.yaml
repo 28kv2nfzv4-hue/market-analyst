@@ -17,6 +17,8 @@ services:
         sync: false
       - key: TELEGRAM_WEBHOOK_SECRET
         sync: false
+      - key: DIGEST_API_SECRET
+        sync: false
     # Free plan has no persistent disk, so trades.db lives on ephemeral
     # container storage and resets on every deploy. Add a `disk:` block
     # (requires a paid instance type) for real persistence.
